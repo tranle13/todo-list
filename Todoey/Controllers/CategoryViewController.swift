@@ -1,10 +1,10 @@
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 	
-	var categories = [Category]()
-	let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+	var categories: Results<Category>?
+	let realm = try! Realm()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -12,18 +12,16 @@ class CategoryViewController: UITableViewController {
 	}
 	
 	// MARK: - Data manipulation methods
-	func loadCategories(request: NSFetchRequest<Category> = Category.fetchRequest()) {
-		do {
-			categories = try context.fetch(request)
-		} catch {
-			print("Error loading categories \(error)")
-		}
+	func loadCategories() {
+		categories = realm.objects(Category.self)
 		tableView.reloadData()
 	}
 	
-	func saveCategories() {
+	func saveCategories(new category: Category) {
 		do {
-			try context.save()
+			try realm.write({
+				realm.add(category)
+			})
 		} catch {
 			print("Error saving categories \(error)")
 		}
@@ -35,11 +33,9 @@ class CategoryViewController: UITableViewController {
 		let alert = UIAlertController(title: "Add New Todoey Category", message: "", preferredStyle: .alert)
 		let action = UIAlertAction(title: "Add Category", style: .default) { action in
 			if let text = alert.textFields?[0].text {
-				let newCategory = Category(context: self.context)
-				newCategory.name = text
-				
-				self.categories.append(newCategory)
-				self.saveCategories()
+				let category = Category()
+				category.name = text
+				self.saveCategories(new: category)
 			}
 		}
 		alert.addAction(action)
@@ -51,14 +47,14 @@ class CategoryViewController: UITableViewController {
 
 	// MARK: - UITableViewDataSource methods
 	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		return categories.count
+		return categories?.count ?? 1
 	}
 	
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
 		
 		var content = cell.defaultContentConfiguration()
-		content.text = categories[indexPath.row].name
+		content.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
 		cell.contentConfiguration = content
 		return cell
 	}
@@ -71,7 +67,7 @@ class CategoryViewController: UITableViewController {
 	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 		let destinationVC = segue.destination as! ToDoListViewController
 		if let indexPath = tableView.indexPathForSelectedRow {
-			destinationVC.selectedCategory = categories[indexPath.row]
+			destinationVC.selectedCategory = categories?[indexPath.row]
 		}
 	}
 }
