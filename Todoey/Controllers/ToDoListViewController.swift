@@ -14,6 +14,12 @@ class ToDoListViewController: SwipeTableViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 	}
+	
+	override func viewWillAppear(_ animated: Bool) {
+		if let categoryName = selectedCategory?.name {
+			title = categoryName
+		}
+	}
 
 	// MARK: - TableView Datasource Methods
 	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
