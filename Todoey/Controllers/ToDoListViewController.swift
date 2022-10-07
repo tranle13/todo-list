@@ -1,7 +1,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
 	
 	let realm = try! Realm()
 	var todoItems: Results<Item>?
@@ -21,7 +21,7 @@ class ToDoListViewController: UITableViewController {
 	}
 	
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+		let cell = super.tableView(tableView, cellForRowAt: indexPath)
 		var content = cell.defaultContentConfiguration()
 		if let item = todoItems?[indexPath.row] {
 			content.text = item.title
@@ -89,6 +89,19 @@ class ToDoListViewController: UITableViewController {
 			print("Error saving context \(error)")
 		}
 		self.tableView.reloadData()
+	}
+	
+	// Delete item
+	override func updateModel(at indexPath: IndexPath) {
+		if let item = todoItems?[indexPath.row] {
+			do {
+				try self.realm.write {
+					self.realm.delete(item)
+				}
+			} catch {
+				print("Error deleting item, \(error)")
+			}
+		}
 	}
 }
 

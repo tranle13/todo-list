@@ -1,7 +1,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
 	
 	var categories: Results<Category>?
 	let realm = try! Realm()
@@ -28,6 +28,19 @@ class CategoryViewController: UITableViewController {
 		tableView.reloadData()
 	}
 	
+	// Delete category
+	override func updateModel(at indexPath: IndexPath) {
+		if let category = categories?[indexPath.row] {
+			do {
+				try realm.write {
+					realm.delete(category)
+				}
+			} catch {
+				print("Error deleting category, \(error)")
+			}
+		}
+	}
+	
 	// MARK: - Add new category
 	@IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
 		let alert = UIAlertController(title: "Add New Todoey Category", message: "", preferredStyle: .alert)
@@ -51,8 +64,7 @@ class CategoryViewController: UITableViewController {
 	}
 	
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-		
+		let cell = super.tableView(tableView, cellForRowAt: indexPath)
 		var content = cell.defaultContentConfiguration()
 		content.text = categories?[indexPath.row].name ?? "No Categories Added Yet"
 		cell.contentConfiguration = content

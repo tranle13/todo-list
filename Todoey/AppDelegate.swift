@@ -4,8 +4,6 @@ import RealmSwift
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
 	func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 		//		Where Realm saves data on the machine
 		//		print(Realm.Configuration.defaultConfiguration.fileURL)
